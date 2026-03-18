@@ -1,5 +1,5 @@
-from smolagents import CodeAgent, FinalAnswerTool, InferenceClientModel, Tool, tool, VisitWebpageTool, DuckDuckGoSearchTool
-
+from smolagents import CodeAgent, FinalAnswerTool, InferenceClientModel, Tool, tool, VisitWebpageTool, DuckDuckGoSearchTool, VisitWebpageTool
+import datetime
 @tool
 def mentor_type(role: str) -> str:
     """
@@ -21,5 +21,11 @@ def mentor_type(role: str) -> str:
         return "Act as friend"
 
 
-agent = CodeAgent(tools=[DuckDuckGoSearchTool(), mentor_type], model=InferenceClientModel())
-agent.run("Search for best agent course for beginners and guide also as a mentor about the field")
+agent = CodeAgent(tools=[DuckDuckGoSearchTool(),VisitWebpageTool(), mentor_type], model=InferenceClientModel(), additional_authorized_imports=['datetime'])
+agent.run("""Raha preparing for test here the steps she follow:
+          1: Make notes - 80 minutes
+          2: Clear concepts - 60 minutes
+          3: Remember notes - 150 minutes
+          4: Revise - 30 minutes
+          
+          Tell me how many Hourse she need to prepare and is she need to take break if yes then after how much time""")
