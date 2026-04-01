@@ -89,14 +89,14 @@ ticket_graph.add_edge('notify_team', END)
 
 compiled_graph = ticket_graph.compile()
 
-urgent_ticket = {
-    "sender": "ali@example.com",
-    "subject": "ASAP - Payment not working",
-    "body": "This is urgent! I cannot process my payment asap please help"
+normal_ticket = {
+    "sender": "sara@example.com", 
+    "subject": "Technical issue with login",
+    "body": "I am getting an error when trying to login to my account"
 }
 
 result = compiled_graph.invoke({
-    "ticket": urgent_ticket,
+    "ticket": normal_ticket,
     "ticket_category": None,
     "is_urgent": None,
     "draft_response": None,
