@@ -1,6 +1,20 @@
 # imports
 from typing import TypedDict, List, Dict, Any, Optional
 from langgraph.graph import StateGraph, START, END
+from langchain_groq import ChatGroq
+from langchain_core.messages import HumanMessage
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# llm
+llm = ChatGroq(
+    model='llama-3.3-70b-versatile',
+    api_key=os.getenv('GROQ_API_KEY'),
+    temperature=0
+)
+
 # state
 class TicketState(TypedDict):
     ticket: Dict[str, Any]
