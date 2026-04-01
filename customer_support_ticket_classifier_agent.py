@@ -5,6 +5,7 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -38,36 +39,69 @@ def classify_ticket(state: TicketState):
     """Agent determine is ticket urgent or not and 
     decide category of ticket is it 'billing', 'technical' or  'general'
     """
-    body = state['ticket']['body'].lower()
+    ticket = state['ticket']
 
-    is_urgent = 'urgent' in body or 'asap' in body
+    prompt = f"""
+    Analyze this customer support ticket and return ONLY a json with:
+    - "category": one of "billing", "technical", "general"
+    - "is_urgent": true or false
 
-    if 'billing' in body or 'payment' in body:
-        category = 'billing'
-    elif 'technical' in body or 'error' in body:
-        category = 'technical'
-    else:
-        category = 'general'
-    
+    Ticket:
+    From: {ticket['sender']}
+    Subject: {ticket['subject']}
+    Body: {ticket['body']}
+
+    Return ONLY json nothing else. 
+    Example:
+    {{"category":"billing", "is_urgent":False}}
+    """
+    messages = [HumanMessage(content=prompt)]
+    response = llm.invoke(messages)
+
+    result = json.loads(response.content)
+
+    new_messages = state.get('messages',[]) + [
+        {'role':'user', 'content':prompt},
+        {'role':'assistant','content':response.content}
+    ]
+
     return {
-        'is_urgent' : is_urgent,
-        'ticket_category' : category
+        'is_urgent' : result['is_urgent'],
+        'ticket_category' : result['category'],
+        'messages': new_messages
     }
 
 def draft_response(state: TicketState):
+    ticket = state['ticket']
     is_urgent = state['is_urgent']
     category = state['ticket_category']
 
-    if is_urgent:
-        draft = 'we have recieved your urgent request we will respond within hour'
-    elif category == 'billing':
-        draft = "Thank you for contacting us about billing..."
-    elif category == "technical":
-        draft = "We understand you're facing a technical issue..."
-    else:
-        draft = "Thank you for reaching out to us..."
+    prompt = f"""
+    Draft a polite response to this customer support ticket.
+
+    Ticket:
+    From: {ticket['sender']}
+    Subject: {ticket['subject']}
+    Body: {ticket['body']}
+    Category: {category}
+    Urgent: {is_urgent}
+
+    Draft a brief, professional response that can review by team and they personalize it before sending.
     
-    return {'draft_response' : draft}
+    """
+
+    messages = [HumanMessage(content=prompt)]
+    response = llm.invoke(messages)
+
+    new_messages = state.get('messages',[]) + [
+        {'role':'user', 'content':prompt},
+        {'role':'assistant','content':response.content}
+    ]
+    
+    return {
+        'draft_response' : response.content,
+        'messages' : new_messages
+    }
 
 def notify_team(state: TicketState):
     """Agent notify team about the ticket and present its draft response"""
@@ -116,3 +150,5 @@ result = compiled_graph.invoke({
     "draft_response": None,
     "messages": []
 })
+
+compiled_graph.get_graph().draw_mermaid_png()
