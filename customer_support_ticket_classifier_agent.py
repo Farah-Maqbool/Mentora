@@ -87,6 +87,7 @@ def notify_team(state: TicketState):
     """Agent notify team about the ticket and present its draft response"""
 
     ticket = state['ticket']
+    last_message = state['messages'][-1]
 
     print("\n" + "="*50)
     print(f"New customer support ticket comes from {ticket['sender']}.")
@@ -94,7 +95,7 @@ def notify_team(state: TicketState):
     print(f"Category: {state['ticket_category']}")
     print("\nI've prepared a draft response for your review:")
     print("-"*50)
-    print(state["draft_response"])
+    print(last_message.content)
     print("="*50 + "\n")
     return {}
 
