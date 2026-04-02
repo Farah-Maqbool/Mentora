@@ -1,8 +1,11 @@
 # imports
-from typing import TypedDict, List, Dict, Any, Optional
+from typing import TypedDict, List, Dict, Any, Optional, Annotated
 from langgraph.graph import StateGraph, START, END
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
+from langgraph.graph.message import add_messages
+from langchain_core.messages import HumanMessage, SystemMessage, AnyMessage
+from langgraph.prebuilt import ToolNode, tools_condition
 from dotenv import load_dotenv
 import os
 import json
@@ -22,7 +25,7 @@ class TicketState(TypedDict):
     ticket_category: Optional[str]
     is_urgent: Optional[bool]
     draft_response: Optional[str]
-    messages: List[Dict[str, Any]]
+    messages: Annotated[List[AnyMessage], add_messages]
 
 # nodes
 def read_ticket(state: TicketState):
@@ -35,11 +38,10 @@ def read_ticket(state: TicketState):
     return {}
     
 
-def classify_ticket(state: TicketState):
+def classify_ticket_tool(sender: str, subject: str, body: str) -> str:
     """Agent determine is ticket urgent or not and 
     decide category of ticket is it 'billing', 'technical' or  'general'
     """
-    ticket = state['ticket']
 
     prompt = f"""
     Analyze this customer support ticket and return ONLY a json with:
@@ -47,42 +49,28 @@ def classify_ticket(state: TicketState):
     - "is_urgent": true or false
 
     Ticket:
-    From: {ticket['sender']}
-    Subject: {ticket['subject']}
-    Body: {ticket['body']}
+    From: {sender}
+    Subject: {subject}
+    Body: {body}
 
     Return ONLY json nothing else. 
     Example:
     {{"category":"billing", "is_urgent":False}}
     """
-    messages = [HumanMessage(content=prompt)]
-    response = llm.invoke(messages)
+    message = HumanMessage(content=prompt)
+    response = llm.invoke([message])
 
-    result = json.loads(response.content)
+    return response.content
 
-    new_messages = state.get('messages',[]) + [
-        {'role':'user', 'content':prompt},
-        {'role':'assistant','content':response.content}
-    ]
-
-    return {
-        'is_urgent' : result['is_urgent'],
-        'ticket_category' : result['category'],
-        'messages': new_messages
-    }
-
-def draft_response(state: TicketState):
-    ticket = state['ticket']
-    is_urgent = state['is_urgent']
-    category = state['ticket_category']
-
+def draft_response_tool(sender: str, subject: str, body: str, is_urgent: bool, category: str) -> str:
+    """Draft a professional and polite response for a customer support ticket."""
     prompt = f"""
     Draft a polite response to this customer support ticket.
 
     Ticket:
-    From: {ticket['sender']}
-    Subject: {ticket['subject']}
-    Body: {ticket['body']}
+    From: {sender}
+    Subject: {subject}
+    Body: {body}
     Category: {category}
     Urgent: {is_urgent}
 
@@ -90,18 +78,10 @@ def draft_response(state: TicketState):
     
     """
 
-    messages = [HumanMessage(content=prompt)]
-    response = llm.invoke(messages)
+    message = HumanMessage(content=prompt)
+    response = llm.invoke([message])
 
-    new_messages = state.get('messages',[]) + [
-        {'role':'user', 'content':prompt},
-        {'role':'assistant','content':response.content}
-    ]
-    
-    return {
-        'draft_response' : response.content,
-        'messages' : new_messages
-    }
+    return response.content
 
 def notify_team(state: TicketState):
     """Agent notify team about the ticket and present its draft response"""
@@ -118,21 +98,50 @@ def notify_team(state: TicketState):
     print("="*50 + "\n")
     return {}
 
+#assistant
+def assistant(state: TicketState):
+    ticket = state['ticket']
+
+    sys_msg = SystemMessage(content=f"""You are a helpful customer support assistant.
+    you have access to tools to classify ticket and draft response
+                            
+    Current Ticket
+    From: {ticket['sender']}
+    Subject: {ticket['subject']}
+    Body: {ticket['body']}
+
+    First classify the ticket, then draft a response.
+    """)
+
+    return {
+        'messages': [llm_with_tools.invoke([sys_msg] + state['messages'])]
+    }
+
+#tools
+tools = [classify_ticket_tool, draft_response_tool]
+llm_with_tools = llm.bind_tools(tools)
 
 # graph
 ticket_graph = StateGraph(TicketState)
 
 # add node
 ticket_graph.add_node('read_ticket', read_ticket)
-ticket_graph.add_node('classify_ticket',classify_ticket)
-ticket_graph.add_node('draft_response',draft_response)
+ticket_graph.add_node('assistant',assistant)
+ticket_graph.add_node('tools',ToolNode(tools))
 ticket_graph.add_node('notify_team',notify_team)
 
 # add edge
 ticket_graph.add_edge(START, 'read_ticket')
-ticket_graph.add_edge('read_ticket', 'classify_ticket')
-ticket_graph.add_edge('classify_ticket', 'draft_response')
-ticket_graph.add_edge('draft_response','notify_team')
+ticket_graph.add_edge('read_ticket', 'assistant')
+ticket_graph.add_conditional_edges(
+    'assistant', 
+    tools_condition,
+    {
+        'tools': 'tools',
+        END: 'notify_team'
+    }
+    )
+ticket_graph.add_edge('tools','assistant')
 ticket_graph.add_edge('notify_team', END)
 
 compiled_graph = ticket_graph.compile()
@@ -151,4 +160,4 @@ result = compiled_graph.invoke({
     "messages": []
 })
 
-compiled_graph.get_graph().draw_mermaid_png()
+# compiled_graph.get_graph().draw_mermaid_png()
