@@ -4,6 +4,7 @@ from llama_index.core.tools import FunctionTool
 from llama_index.retrievers.bm25 import BM25Retriever
 from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.llms.groq import Groq
+from llama_index.tools.duckduckgo import DuckDuckGoSearchToolSpec
 from dotenv import load_dotenv
 import os
 import asyncio
@@ -39,16 +40,36 @@ def get_guest_info_retriever(query: str) -> str:
 
 guest_info_tool = FunctionTool.from_defaults(get_guest_info_retriever)
 
+#search tool
+tool_spec = DuckDuckGoSearchToolSpec()
+
+def web_search(query: str) -> str:
+    """Search the web for current information using DuckDuckGo."""
+    results = tool_spec.duckduckgo_search(query)
+    return str(results)
+
+search_tool = FunctionTool.from_defaults(
+    web_search,
+    name="web_search",
+    description="Search the web for current info.")
+
 #agent
-llm = Groq(model='llama-3.3-70b-versatile', api_key=os.getenv('GROQ_API_KEY'))
+llm = Groq(model='openai/gpt-oss-120b', api_key=os.getenv('GROQ_API_KEY'), is_streaming=False)
 
 alferd = AgentWorkflow.from_tools_or_functions(
-    [guest_info_tool],
-    llm=llm
+    [guest_info_tool, search_tool],
+    llm=llm,
+    system_prompt="""
+    You are a helpful assistant with access to tools.
+    To answer questions about the President of France or current events, 
+    you MUST use the 'web_search' tool.
+    
+    When you decide to use a tool, output the function call clearly.
+    """
 )
 
 async def main():
-    response =await alferd.run(user_msg="Tell me about our guest named 'Lady Ada Lovelace.")
+    response =await alferd.run(user_msg="Who's the current President of France?")
 
     print(response)
 
