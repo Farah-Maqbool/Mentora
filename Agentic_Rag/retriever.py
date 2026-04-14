@@ -66,16 +66,28 @@ weather_tool = FunctionTool.from_defaults(
     name="get_weather", 
     description="Get current weather for a city.")
 
+#news tool
+def get_news(topic: str) -> str:
+    """"Get the latest news headlines for a specific topic."""
+    results = tool_spec.duckduckgo_search(f"latest news {topic} 2026")
+    return str(results)
+
+news_tool = FunctionTool.from_defaults(
+    get_news,
+    name="get_news",
+    description="Get the latest news headlines for a specific topic."
+)
+
 #agent
 llm = Groq(model='openai/gpt-oss-120b', api_key=os.getenv('GROQ_API_KEY'), is_streaming=False)
 
 alferd = AgentWorkflow.from_tools_or_functions(
-    [guest_info_tool, search_tool, weather_tool],
+    [guest_info_tool, search_tool, weather_tool, news_tool],
     llm=llm,
 )
 
 async def main():
-    response =await alferd.run(user_msg="What's the weather in Paris?")
+    response =await alferd.run(user_msg="What's the current news about AI")
 
     print(response)
 
