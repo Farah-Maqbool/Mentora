@@ -59,13 +59,6 @@ llm = Groq(model='openai/gpt-oss-120b', api_key=os.getenv('GROQ_API_KEY'), is_st
 alferd = AgentWorkflow.from_tools_or_functions(
     [guest_info_tool, search_tool],
     llm=llm,
-    system_prompt="""
-    You are a helpful assistant with access to tools.
-    To answer questions about the President of France or current events, 
-    you MUST use the 'web_search' tool.
-    
-    When you decide to use a tool, output the function call clearly.
-    """
 )
 
 async def main():
