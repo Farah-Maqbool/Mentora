@@ -24,13 +24,11 @@ extractor_llm = ChatGroq(
 
 #format histroy
 def format_history(messages: list) -> str:
-    """Format message list into readable conversation string."""
     lines = []
-
     for m in messages:
         if hasattr(m, "type"):
-            role = "Student" if m.type == "Human" else "Mentora"
-            lines.append(f"{role}:{m.content}")
+            role = "Student" if m.type == "human" else "Mentora"
+            lines.append(f"{role}: {m.content}")
         elif isinstance(m, dict):
             role = "Student" if m.get("role") == "user" else "Mentora"
             lines.append(f"{role}: {m.get('content', '')}")
@@ -62,20 +60,21 @@ def extract_profile(history_str: str, collected: dict) -> dict:
         return collected
     
 def onboarding_node(state: MentoraState) -> dict:
-    """
-    Main onboarding agent node.
-    Generates a dynamic reply and silently extracts profile data.
-    """
-
     messages = state.get("messages", [])
-    collected = state.get("collected",{})
+    collected = state.get("collected", {})
+
+    # fix 1 — initialise resource_preference from state first
+    # so it is never unbound
+    resource_preference = state.get("resource_preference", None)
 
     history_str = format_history(messages)
 
-    system_prompt = ONBOARDING_SYSTEM_PROMPT.format(collected=json.dumps(collected, indent=2 if collected else "Nothing collected yet"),
-                                                    history=history_str)
-    
-    #give mentora reply
+    # fix 2 — indent was wrong on the if collected else
+    system_prompt = ONBOARDING_SYSTEM_PROMPT.format(
+        collected=json.dumps(collected, indent=2) if collected else "Nothing collected yet.",
+        history=history_str
+    )
+
     llm_messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=messages[-1].content if messages else "Hello")
@@ -87,10 +86,18 @@ def onboarding_node(state: MentoraState) -> dict:
     onboarding_complete = False
     clean_reply = reply
 
-    if "ONBOARDING_COMPLETE" in reply:
+    if "RESOURCE_PREFERENCE:free" in reply:
+        resource_preference = "free"
+        clean_reply = clean_reply.replace("RESOURCE_PREFERENCE:free", "").strip()
+    elif "RESOURCE_PREFERENCE:paid" in reply:
+        resource_preference = "paid"
+        clean_reply = clean_reply.replace("RESOURCE_PREFERENCE:paid", "").strip()
+
+    if "ONBOARDING_COMPLETE" in clean_reply:
         onboarding_complete = True
-        clean_reply = reply.replace("ONBOARDING_COMPLETE", "").strip()
-    
+        clean_reply = clean_reply.replace("ONBOARDING_COMPLETE", "").strip()
+
+    # fix 3 — use clean_reply not reply when building updated history
     all_messages = list(messages) + [AIMessage(content=clean_reply)]
     updated_history = format_history(all_messages)
     updated_collected = extract_profile(updated_history, collected)
@@ -99,5 +106,6 @@ def onboarding_node(state: MentoraState) -> dict:
         "messages": [AIMessage(content=clean_reply)],
         "collected": updated_collected,
         "onboarding_complete": onboarding_complete,
+        "resource_preference": resource_preference,
         "current_node": "onboarding"
     }

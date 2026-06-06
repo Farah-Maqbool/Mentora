@@ -2,22 +2,10 @@ from langgraph.graph import StateGraph, END
 from agents.state import MentoraState
 from agents.supervisor import supervisor
 from agents.onboarding_agent import onboarding_node
+from agents.search_agent import search_node
+from agents.plan_agent import plan_node
 
 # nodes
-
-def search_node(state: MentoraState) -> dict:
-    from langchain_core.messages import AIMessage
-    return {
-        "messages": [AIMessage(content="Search agent placeholder")],
-        "current_node": "search"
-    }
-
-def plan_node(state: MentoraState) -> dict:
-    from langchain_core.messages import AIMessage
-    return {
-        "messages": [AIMessage(content="Plan agent placeholder")],
-        "current_node": "plan"
-    }
 
 def updater_node(state: MentoraState) -> dict:
     from langchain_core.messages import AIMessage
