@@ -1,6 +1,6 @@
-from agents.state import MentorState
+from agents.state import MentoraState
 
-def supervisor(state: MentorState) -> str:
+def supervisor(state: MentoraState) -> str:
     """
     Reads current state and decides which node runs next.
     Returns the name of the next node as a string.

@@ -1,7 +1,7 @@
 from typing import TypedDict, Optional, Annotated
 from langgraph.graph.message import add_messages
 
-class MentorState(TypedDict):
+class MentoraState(TypedDict):
     user_id: str
     messages: Annotated[list, add_messages]
     collected: dict
