@@ -72,3 +72,4 @@ if prompt := st.chat_input("Talk to Mentora..."):
 
     st.session_state.messages.append({"role": "assistant", "content": response})
 
+st.sidebar.json(st.session_state.mentora_state.get("collected", {}))

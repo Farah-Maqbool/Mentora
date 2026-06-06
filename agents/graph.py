@@ -1,14 +1,9 @@
 from langgraph.graph import StateGraph, END
 from agents.state import MentoraState
 from agents.supervisor import supervisor
+from agents.onboarding_agent import onboarding_node
 
 # nodes
-def onboarding_node(state: MentoraState) -> dict:
-    from langchain_core.messages import AIMessage
-    return {
-        "messages" : [AIMessage(content="Onboarding agent placeholder")],
-        "current_node" : "onboarding"
-    }
 
 def search_node(state: MentoraState) -> dict:
     from langchain_core.messages import AIMessage
