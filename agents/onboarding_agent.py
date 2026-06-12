@@ -77,9 +77,14 @@ def onboarding_node(state: MentoraState) -> dict:
         history=history_str
     )
 
+    if not messages:
+        user_input = f"Greet {collected.get('name', 'the student')} warmly and ask your first question."
+    else:
+        user_input = messages[-1].content
+
     llm_messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=messages[-1].content if messages else "Hello")
+        HumanMessage(content=user_input)
     ]
 
     response = llm.invoke(llm_messages)
