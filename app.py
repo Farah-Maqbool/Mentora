@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage
-from db.queries import save_message, save_profile, save_plan
+from db.queries import save_messages, save_profile, save_plan
 from agents.graph import mentora_graph
 from utils.state_helpers import load_user_state, build_display_messages
 from services.auth import sign_up, sign_in, sign_out
@@ -88,7 +88,7 @@ def show_main_app():
                 ai_messages = [m for m in result["messages"] if hasattr(m, "type") and m.type == "ai"]
                 greeting = ai_messages[-1].content if ai_messages else "Hi! I'm Mentora."
 
-                save_message(user_id, "assistant", greeting)
+                save_messages(user_id, "assistant", greeting)
                 st.session_state.messages.append({"role": "assistant", "content": greeting})
 
     # display chat history
@@ -102,7 +102,7 @@ def show_main_app():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        save_message(user_id, "user", prompt)
+        save_messages(user_id, "user", prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
         st.session_state.mentora_state["messages"].append(
@@ -121,7 +121,7 @@ def show_main_app():
 
             st.markdown(response)
 
-        save_message(user_id, "assistant", response)
+        save_messages(user_id, "assistant", response)
         st.session_state.messages.append({"role": "assistant", "content": response})
 
         if result.get("collected"):
