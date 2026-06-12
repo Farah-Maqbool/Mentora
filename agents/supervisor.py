@@ -60,9 +60,16 @@ def supervisor(state: MentoraState) -> str:
     if not state.get("onboarding_complete", False):
         return "onboarding"
 
-    # resource preference not collected yet
-    if state.get("resource_preference") is None:
-        return "onboarding"
+    
+    if state.get("plan") is not None:
+        # check for life events
+        messages = state.get("messages", [])
+        last_message = messages[-1] if messages else None
+        if last_message:
+            content = last_message.content if hasattr(last_message, "content") else str(last_message)
+            if is_life_event(content):
+                return "updater"
+        return "onboarding"  
 
     # no plan yet — go generate one
     if state.get("plan") is None:

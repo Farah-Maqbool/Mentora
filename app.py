@@ -32,16 +32,17 @@ if prompt := st.chat_input("Talk to Mentora..."):
     # show user message
     with st.chat_message("user"):
         st.markdown(prompt)
+
+    save_messages(TEMP_USER_ID, "user", prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
+
+    st.session_state.mentora_state["messages"].append(
+        HumanMessage(content=prompt)
+    )
 
     # add message to mentora state and run graph
     with st.chat_message("assistant"):
         with st.spinner("Mentora is thinking..."):
-
-            # add user message to state
-            st.session_state.mentora_state["messages"].append(
-                HumanMessage(content=prompt)
-            )
 
             # run the graph
             result = mentora_graph.invoke(st.session_state.mentora_state)
@@ -58,6 +59,21 @@ if prompt := st.chat_input("Talk to Mentora..."):
 
         st.markdown(response)
 
+    # save assistant message to db
+    save_messages(TEMP_USER_ID, "assistant", response)
     st.session_state.messages.append({"role": "assistant", "content": response})
 
-st.sidebar.json(st.session_state.mentora_state.get("collected", {}))
+    if result.get("collected"):
+        save_profile(TEMP_USER_ID, result["collected"])
+
+    # persist plan if just generated
+    if result.get("plan") and not st.session_state.mentora_state.get("plan"):
+        save_plan(TEMP_USER_ID, result["plan"])
+
+with st.sidebar:
+    st.subheader("Collected Profile")
+    st.json(st.session_state.mentora_state.get("collected", {}))
+    if st.session_state.mentora_state.get("plan"):
+        st.success("Plan generated ✓")
+    if st.session_state.mentora_state.get("onboarding_complete"):
+        st.success("Onboarding complete ✓")
