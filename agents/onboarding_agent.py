@@ -40,7 +40,9 @@ def extract_profile(history_str: str, collected: dict) -> dict:
     Runs after every student message — student never sees this.
     """
 
-    prompt = EXTRACTION_PROMPT.format(history=history_str)
+    lines = history_str.split("\n")
+    recent_history = "\n".join(lines[-6:])
+    prompt = EXTRACTION_PROMPT.format(history=recent_history)
 
     try:
         response = extractor_llm.invoke([HumanMessage(content=prompt)])

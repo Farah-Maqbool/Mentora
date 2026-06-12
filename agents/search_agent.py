@@ -24,7 +24,7 @@ def search_node(state: MentoraState) -> dict:
     collected = state.get("collected",{})
     preference= state.get("resource_prefrence","free")
 
-    profile_str = json.dumpts(collected,indent=2)
+    profile_str = json.dumps(collected,indent=2)
     
     prompt = SEARCH_QUERY_PROMPT.format(
         profile=profile_str,
