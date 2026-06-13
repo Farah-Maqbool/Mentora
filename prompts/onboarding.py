@@ -24,7 +24,11 @@ free resources or are open to paid ones. Ask it naturally like:
 "By the way, when I put together your plan, would you prefer free
 resources only, or are you open to paid courses too?"
 
-Once they answer that question output exactly this on its own line:
+Once they answer, write ONE warm closing sentence telling them you're
+now going to put together their personalised plan — something like
+"Perfect! Give me a moment while I put together your personalised roadmap..."
+
+Then on a new line output exactly:
 RESOURCE_PREFERENCE:free
 or
 RESOURCE_PREFERENCE:paid

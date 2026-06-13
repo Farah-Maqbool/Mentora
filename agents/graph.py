@@ -15,6 +15,22 @@ def updater_node(state: MentoraState) -> dict:
     }
 
 
+def after_onboarding(state: MentoraState) -> str:
+    """
+    Decides what happens right after onboarding_node runs.
+    If onboarding just completed and preference is set and no plan yet,
+    continue straight to search in the same invoke.
+    Otherwise end here.
+    """
+
+    if (
+        state.get("onboarding_complete")
+        and state.get("resource_preference") is not None
+        and state.get("plan") is None
+    ):
+        return "search"
+    return "end"
+
 #graph
 # build the graph
 def build_graph():
@@ -36,11 +52,17 @@ def build_graph():
         }
     )
 
+    graph.add_conditional_edges(
+        "onboarding",
+        after_onboarding,
+        {
+            "search": "search",
+            "end": END
+        }
+    )
+
     # after search always go to plan
     graph.add_edge("search", "plan")
-
-    # all other nodes end after running
-    graph.add_edge("onboarding", END)
     graph.add_edge("plan", END)
     graph.add_edge("updater", END)
 
