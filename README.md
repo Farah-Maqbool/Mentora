@@ -118,50 +118,6 @@ mentora/
 
 ---
 
-## 🗄️ Database Schema (Supabase / PostgreSQL)
-
-**`profiles`**
-| Column | Type | Description |
-|---|---|---|
-| id | uuid | Matches `auth.users.id` |
-| name | text | Student's name |
-| email | text | Student's email |
-| university | text | Institution name |
-| degree | text | Current degree / field |
-| interests | jsonb | Interests beyond degree |
-| goal | text | Main academic/career goal |
-| time_per_week | text | Time available for learning |
-| constraints | jsonb | Budget, location, language constraints |
-
-**`messages`**
-| Column | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| user_id | uuid | References `auth.users.id` |
-| role | text | `user` or `assistant` |
-| content | text | Message content |
-| created_at | timestamp | Sent at |
-
-**`plans`**
-| Column | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| user_id | uuid | References `auth.users.id` |
-| content | jsonb | Full roadmap JSON |
-| version | int | Auto-incremented on each update |
-| created_at | timestamp | Created at |
-
-**`reminders`**
-| Column | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| user_id | uuid | References `auth.users.id` |
-| reminder_time | text | `HH:MM` in UTC |
-| timezone | text | Currently UTC only |
-| is_active | boolean | Whether reminders are enabled |
-
----
-
 ## 🚀 Getting Started Locally
 
 ### 1. Clone and install dependencies
