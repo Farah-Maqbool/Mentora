@@ -1,8 +1,8 @@
 # Mentora 🎓
 
-**Your personal academic mentor — one continuous conversation that guides you, builds your roadmap, and adapts as life happens.**
+**Your personal academic mentor one continuous conversation that guides you, builds your roadmap, and adapts as life happens.**
 
-Mentora is an AI-powered mentorship platform for undergraduate and graduate students who want clear, personalised direction for their academic and career journey. Unlike generic AI chatbots, Mentora doesn't just answer questions — it gets to know you through a natural conversation, builds a real learning roadmap with curated sources, and keeps adjusting that plan as your circumstances change.
+Mentora is an AI-powered mentorship platform for undergraduate and graduate students who want clear, personalised direction for their academic and career journey. Unlike generic AI chatbots, Mentora doesn't just answer questions it gets to know you through a natural conversation, builds a real learning roadmap with curated sources, and keeps adjusting that plan as your circumstances change.
 
 #### Try it here: https://mentora-talk.streamlit.app/
 
