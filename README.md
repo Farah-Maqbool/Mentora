@@ -116,46 +116,6 @@ mentora/
 
 ```
 
----
-
-## 🚀 Getting Started Locally
-
-### 1. Clone and install dependencies
-
-```bash
-git clone https://github.com/YOUR_USERNAME/mentora.git
-cd mentora
-python -m venv venv
-venv\Scripts\activate      # Windows
-pip install -r requirements.txt
-```
-
-### 2. Set up accounts (all free)
-
-- **Groq** — [console.groq.com](https://console.groq.com) → create API key
-- **Supabase** — [supabase.com](https://supabase.com) → create project → run schema SQL → get URL + publishable key
-- **Tavily** — [app.tavily.com](https://app.tavily.com) → get API key
-- **Resend** — [resend.com](https://resend.com) → get API key
-
-### 3. Configure secrets
-
-Create `.streamlit/secrets.toml`:
-
-```toml
-GROQ_API_KEY = "gsk_..."
-SUPABASE_URL = "https://xxxx.supabase.co"
-SUPABASE_ANON_KEY = "eyJ..."
-TAVILY_API_KEY = "tvly-..."
-RESEND_API_KEY = "re_..."
-```
-
-### 4. Run the app
-
-```bash
-streamlit run app.py
-```
----
-
 ## ⚠️ Known Limitations
 
 - **Row Level Security (RLS) is disabled** on database tables for development simplicity. Not recommended for production use with real sensitive data without re-enabling RLS with proper authenticated requests.
