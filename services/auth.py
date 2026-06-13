@@ -13,6 +13,7 @@ def sign_up(email: str, password: str, name: str, university: str, degree: str):
         if response.user:
             supabase.table("profiles").upsert({
                 "id" : response.user.id,
+                "email" : email,
                 "name" : name,
                 "university" : university,
                 "degree" : degree

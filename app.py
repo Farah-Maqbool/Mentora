@@ -1,15 +1,20 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage
-from db.queries import save_messages, save_profile, save_plan
+from db.queries import save_messages, save_profile, save_plan, save_reminder
 from agents.graph import mentora_graph
 from utils.state_helpers import load_user_state, build_display_messages
 from services.auth import sign_up, sign_in, sign_out
+from services.scheduler import start_scheduler
 
 st.set_page_config(
     page_title="Mentora",
     
     layout="wide"
 )
+
+if "scheduler_started" not in st.session_state:
+    start_scheduler()
+    st.session_state.scheduler_started = True
 
 # ── AUTH STATE ──
 if "user" not in st.session_state:
@@ -134,6 +139,13 @@ def show_main_app():
         if new_plan and new_plan != old_plan:
             save_plan(user_id, new_plan)
 
+        # save reminder time if just set
+        old_reminder = st.session_state.mentora_state.get("reminder_time")
+        new_reminder = result.get("reminder_time")
+
+        if new_reminder and new_reminder != old_reminder:
+            save_reminder(user_id, new_reminder)
+
         st.session_state.mentora_state = result
 
     # sidebar debug info
@@ -144,7 +156,8 @@ def show_main_app():
             st.success("Plan generated ✓")
         if st.session_state.mentora_state.get("onboarding_complete"):
             st.success("Onboarding complete ✓")
-
+        if st.session_state.mentora_state.get("reminder_time"):
+            st.info(f"Reminder set for {st.session_state.mentora_state['reminder_time']} UTC daily")
 
 # ── ROUTER ──
 if st.session_state.user is None:

@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from agents.state import MentoraState
@@ -64,16 +65,17 @@ def extract_profile(history_str: str, collected: dict) -> dict:
 def onboarding_node(state: MentoraState) -> dict:
     messages = state.get("messages", [])
     collected = state.get("collected", {})
-
-    # fix 1 — initialise resource_preference from state first
-    # so it is never unbound
     resource_preference = state.get("resource_preference", None)
+    reminder_time = state.get("reminder_time", None)
+    onboarding_already_complete = state.get("onboarding_complete", False)
+
 
     history_str = format_history(messages)
 
-    # fix 2 — indent was wrong on the if collected else
+    
     system_prompt = ONBOARDING_SYSTEM_PROMPT.format(
         collected=json.dumps(collected, indent=2) if collected else "Nothing collected yet.",
+        reminder_time=reminder_time if reminder_time else "not set yet",
         history=history_str
     )
 
@@ -90,8 +92,16 @@ def onboarding_node(state: MentoraState) -> dict:
     response = llm.invoke(llm_messages)
     reply = response.content.strip()
 
-    onboarding_complete = False
+    onboarding_complete = onboarding_already_complete
     clean_reply = reply
+
+    reminder_match = re.search(r"REMINDER_TIME:(\d{1,2}:\d{2})", reply)
+    if reminder_match:
+        time_str = reminder_match.group(1)
+        # normalize to HH:MM with leading zero
+        hour, minute = time_str.split(":")
+        reminder_time = f"{int(hour):02d}:{minute}"
+        clean_reply = re.sub(r"REMINDER_TIME:\d{1,2}:\d{2}\s*", "", clean_reply).strip()
 
     if "RESOURCE_PREFERENCE:free" in reply:
         resource_preference = "free"
@@ -104,15 +114,18 @@ def onboarding_node(state: MentoraState) -> dict:
         onboarding_complete = True
         clean_reply = clean_reply.replace("ONBOARDING_COMPLETE", "").strip()
 
-    # fix 3 — use clean_reply not reply when building updated history
-    all_messages = list(messages) + [AIMessage(content=clean_reply)]
-    updated_history = format_history(all_messages)
-    updated_collected = extract_profile(updated_history, collected)
-
+    if onboarding_already_complete:
+        updated_collected = collected
+    else:
+        all_messages = list(messages) + [AIMessage(content=clean_reply)]
+        updated_history = format_history(all_messages)
+        updated_collected = extract_profile(updated_history, collected)
+        
     return {
         "messages": [AIMessage(content=clean_reply)],
         "collected": updated_collected,
         "onboarding_complete": onboarding_complete,
         "resource_preference": resource_preference,
+        "reminder_time": reminder_time,
         "current_node": "onboarding"
     }
