@@ -1,8 +1,9 @@
-import os
-from tavily import TavilyClient
-from dotenv import load_dotenv
 
-load_dotenv()
+from tavily import TavilyClient
+
+import streamlit as st
+
+
 
 def search_resources(queries: list[str], prefrences: str = "free") -> list[dict]:
     """
@@ -10,7 +11,7 @@ def search_resources(queries: list[str], prefrences: str = "free") -> list[dict]
     Filters based on free or paid preference.
     """
 
-    client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+    client = TavilyClient(api_key=st.secrets["TAVILY_API_KEY"])
     all_results = []
 
     for query in queries:

@@ -1,0 +1,10 @@
+streamlit
+langchain
+langchain-groq
+langchain-community
+langgraph
+supabase
+tavily-python
+resend
+apscheduler
+python-dotenv

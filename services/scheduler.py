@@ -1,7 +1,7 @@
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
-from db.client import get_supabase_client
+from db.clients import get_supabase_client
 from services.email import send_reminder_email
 
 

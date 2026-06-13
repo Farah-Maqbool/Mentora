@@ -1,10 +1,8 @@
 import os
 import resend
-from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
-
-resend.api_key = os.getenv("RESEND_API_KEY")
+resend.api_key = st.secrets["RESEND_API_KEY"]
 
 
 def send_reminder_email(to_email: str, name: str, plan_title: str = "your roadmap"):

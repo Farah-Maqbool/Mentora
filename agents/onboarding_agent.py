@@ -1,25 +1,23 @@
 import json
-import os
 import re
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from agents.state import MentoraState
 from prompts.onboarding import ONBOARDING_SYSTEM_PROMPT, EXTRACTION_PROMPT
-from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
 
 #llm
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=st.secrets["GROQ_API_KEY"],
     temperature=0.7
 )
 
 #small - llm for extraction
 extractor_llm = ChatGroq(
     model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=st.secrets["GROQ_API_KEY"],
     temperature=0.0
 )
 

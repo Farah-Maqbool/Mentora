@@ -1,16 +1,14 @@
 import json
-import os
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, AIMessage
 from agents.state import MentoraState
 from prompts.updater import PLAN_UPDATE_PROMPT
-from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
 
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=st.secrets["GROQ_API_KEY"],
     temperature=0.3
 )
 
