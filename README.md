@@ -4,7 +4,7 @@
 
 Mentora is an AI-powered mentorship platform for undergraduate and graduate students who want clear, personalised direction for their academic and career journey. Unlike generic AI chatbots, Mentora doesn't just answer questions — it gets to know you through a natural conversation, builds a real learning roadmap with curated sources, and keeps adjusting that plan as your circumstances change.
 
-### Try it here: https://mentora-talk.streamlit.app/
+#### Try it here: https://mentora-talk.streamlit.app/
 
 ---
 
@@ -136,4 +136,4 @@ mentora/
 - Plan version history view for students
 - Mobile-responsive layout improvements
 
-### Try it here: https://mentora-talk.streamlit.app/
+#### Try it here: https://mentora-talk.streamlit.app/
