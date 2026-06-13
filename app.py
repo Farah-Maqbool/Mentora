@@ -127,8 +127,12 @@ def show_main_app():
         if result.get("collected"):
             save_profile(user_id, result["collected"])
 
-        if result.get("plan") and not st.session_state.mentora_state.get("plan"):
-            save_plan(user_id, result["plan"])
+        # save plan if newly generated OR updated
+        old_plan = st.session_state.mentora_state.get("plan")
+        new_plan = result.get("plan")
+
+        if new_plan and new_plan != old_plan:
+            save_plan(user_id, new_plan)
 
         st.session_state.mentora_state = result
 

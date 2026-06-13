@@ -4,15 +4,7 @@ from agents.supervisor import supervisor
 from agents.onboarding_agent import onboarding_node
 from agents.search_agent import search_node
 from agents.plan_agent import plan_node
-
-# nodes
-
-def updater_node(state: MentoraState) -> dict:
-    from langchain_core.messages import AIMessage
-    return {
-        "messages": [AIMessage(content="Updater agent placeholder")],
-        "current_node": "updater"
-    }
+from agents.updater_agent import updater_node
 
 
 def after_onboarding(state: MentoraState) -> str:
