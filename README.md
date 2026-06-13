@@ -113,9 +113,7 @@ mentora/
 ├── utils/
 │   ├── state_helpers.py           # Load/rebuild state from Supabase
 │   └── formatters.py              # Display formatting helpers
-│
-└── assets/
-    └── style.css                  # Custom UI styling
+
 ```
 
 ---
