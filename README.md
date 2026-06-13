@@ -154,19 +154,6 @@ RESEND_API_KEY = "re_..."
 ```bash
 streamlit run app.py
 ```
-
----
-
-## ☁️ Deployment
-
-Mentora is deployed on **Streamlit Community Cloud**:
-
-1. Push the repo to GitHub
-2. Go to [share.streamlit.io](https://share.streamlit.io) → New app
-3. Connect your repo, set main file to `app.py`
-4. Add the same secrets from `secrets.toml` in the app's Secrets settings
-5. Deploy
-
 ---
 
 ## ⚠️ Known Limitations
@@ -187,3 +174,4 @@ Mentora is deployed on **Streamlit Community Cloud**:
 - Plan version history view for students
 - Mobile-responsive layout improvements
 
+### Try it here:
